@@ -4,10 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3c50b054-d8fe-4609-8ea0-fc5862b888c8" name="Changes" comment="A working program for image processing.">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/image_processing_log.txt" beforeDir="false" afterPath="$PROJECT_DIR$/image_processing_log.txt" afterDir="false" />
-    </list>
+    <list default="true" id="3c50b054-d8fe-4609-8ea0-fc5862b888c8" name="Changes" comment="main" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -22,12 +19,12 @@
     &quot;assignee&quot;: &quot;grbj1&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings">{
-  &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/grbj1/image-processing-app.git&quot;,
-    &quot;accountId&quot;: &quot;ab989669-1a29-48de-8415-2bc288022c07&quot;
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/grbj1/image-processing.git",
+    "accountId": "bb9b0be7-2006-48b3-a3d9-cc8d3c2cdadd"
   }
-}</component>
+}]]></component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 7
 }</component>
@@ -110,12 +107,21 @@
       <option name="project" value="LOCAL" />
       <updated>1750677408922</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="main">
+      <option name="closed" value="true" />
+      <created>1751548401036</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1751548401036</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="A working program for image processing." />
     <MESSAGE value="A working program for image processing.2" />
-    <option name="LAST_COMMIT_MESSAGE" value="A working program for image processing.2" />
+    <MESSAGE value="main" />
+    <option name="LAST_COMMIT_MESSAGE" value="main" />
   </component>
 </project>
