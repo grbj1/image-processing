@@ -83,17 +83,41 @@ class ConsoleImageProcessor:
                 self.log("Ошибка: введите число от 1 до 3!")
 
     def save_image(self):
-        """Сохранение текущего изображения"""
+        """Сохранение текущего изображения в папку 'save' (создается автоматически)"""
         if self.image is None:
             self.log("Нет изображения для сохранения!")
             return
 
-        file_path = input("Введите путь для сохранения (по умолчанию output.jpg): ").strip('"\' ') or "output.jpg"
-        file_path = os.path.normpath(file_path)
+        # Определяем путь к папке 'save' относительно текущего скрипта
+        script_dir = os.path.dirname(os.path.abspath(__file__))  # Папка, где лежит main.py
+        save_dir = os.path.join(script_dir, "save")  # Полный путь к папке save
+
+        # Создаем папку, если её нет
+        if not os.path.exists(save_dir):
+            os.makedirs(save_dir)
+            self.log(f"Создана папка: {save_dir}")
+
+        # Запрашиваем имя файла (по умолчанию output.jpg)
+        default_filename = "output.jpg"
+        user_input = input(f"Введите имя файла (по умолчанию {default_filename}): ").strip('"\' ')
+
+        # Если пользователь не ввел имя, используем default_filename
+        if not user_input:
+            filename = default_filename
+        else:
+            # Если введенное имя не содержит расширения, добавляем .jpg
+            if "." not in user_input:
+                filename = f"{user_input}.jpg"
+            else:
+                filename = user_input
+
+        # Формируем полный путь для сохранения
+        full_path = os.path.join(save_dir, filename)
+        full_path = os.path.normpath(full_path)  # Нормализуем путь (убираем лишние символы)
 
         try:
-            cv2.imwrite(file_path, self.image)
-            self.log(f"Изображение успешно сохранено как {file_path}")
+            cv2.imwrite(full_path, self.image)
+            self.log(f"Изображение сохранено: {full_path}")
         except Exception as e:
             self.log(f"Ошибка при сохранении: {str(e)}")
 
