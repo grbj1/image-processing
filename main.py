@@ -1,6 +1,7 @@
 import os
 import cv2
 import numpy as np
+import time  # Добавляем импорт модуля времени
 
 
 class ConsoleImageProcessor:
@@ -10,21 +11,40 @@ class ConsoleImageProcessor:
         self.log_file = "image_processing_log.txt"
 
         # Очищаем или создаем лог-файл
-        with open(self.log_file, 'w') as f:
+        with open(self.log_file, "w") as f:
             f.write("=== Image Processing Log ===\n")
 
-        self.log("Программа запущена. Добро пожаловать в консольный обработчик изображений!")
+        self.log(
+            "Программа запущена. Добро пожаловать в консольный обработчик изображений!"
+        )
+
+    def show_image(self, img, title="Image", delay=3000):
+        """Показывает изображение с гарантированным временем показа"""
+        try:
+            cv2.namedWindow(title, cv2.WINDOW_NORMAL)
+            cv2.imshow(title, img)
+            start_time = time.time()
+
+            while True:
+                # Ждем либо нажатия клавиши, либо истечения времени
+                if cv2.waitKey(100) >= 0 or (time.time() - start_time) * 1000 > delay:
+                    break
+
+            cv2.destroyAllWindows()
+            cv2.waitKey(1)  # Дополнительное ожидание для корректного закрытия окон
+        except Exception as e:
+            self.log(f"Ошибка отображения изображения: {e}")
 
     def log(self, message):
         """Записывает сообщение в лог-файл и выводит в консоль"""
         print(message)
-        with open(self.log_file, 'a') as f:
+        with open(self.log_file, "a") as f:
             f.write(message + "\n")
 
     def load_image_from_file(self):
         """Загрузка изображения с диска"""
         while True:
-            file_path = input("Введите путь к изображению: ").strip('"\' ')
+            file_path = input("Введите путь к изображению: ").strip("\"' ")
             file_path = os.path.normpath(file_path)
 
             if not os.path.exists(file_path):
@@ -34,10 +54,16 @@ class ConsoleImageProcessor:
             self.image = cv2.imread(file_path)
             if self.image is not None:
                 self.original_image = self.image.copy()
-                self.log(f"Изображение успешно загружено. Размер: {self.image.shape[1]}x{self.image.shape[0]}")
+                self.log(
+                    f"Изображение успешно загружено. Размер: {self.image.shape[1]}x{self.image.shape[0]}"
+                )
+                # Показываем изображение на 2 секунды
+                self.show_image(self.image, "Загруженное изображение", 2000)
                 return True
             else:
-                self.log("Ошибка: Не удалось загрузить изображение. Проверьте формат файла.")
+                self.log(
+                    "Ошибка: Не удалось загрузить изображение. Проверьте формат файла."
+                )
                 return False
 
     def capture_image_from_camera(self):
@@ -52,8 +78,12 @@ class ConsoleImageProcessor:
         if ret:
             self.image = frame
             self.original_image = self.image.copy()
-            self.log(f"Изображение с камеры захвачено. Размер: {self.image.shape[1]}x{self.image.shape[0]}")
+            self.log(
+                f"Изображение с камеры захвачено. Размер: {self.image.shape[1]}x{self.image.shape[0]}"
+            )
             cap.release()
+            # Показываем изображение на 2 секунды
+            self.show_image(self.image, "Снимок с камеры", 2000)
             return True
         else:
             self.log("Ошибка при захвате изображения с камеры!")
@@ -83,59 +113,52 @@ class ConsoleImageProcessor:
                 self.log("Ошибка: введите число от 1 до 3!")
 
     def save_image(self):
-        """Сохранение текущего изображения в папку 'save' (создается автоматически)"""
+        """Сохранение текущего изображения"""
         if self.image is None:
             self.log("Нет изображения для сохранения!")
-            return
+            return False
 
-        # Определяем путь к папке 'save' относительно текущего скрипта
-        script_dir = os.path.dirname(os.path.abspath(__file__))  # Папка, где лежит main.py
-        save_dir = os.path.join(script_dir, "save")  # Полный путь к папке save
+        # Запрашиваем имя файла
+        filename = input("Введите имя файла (без расширения): ").strip() or "result"
 
-        # Создаем папку, если её нет
-        if not os.path.exists(save_dir):
-            os.makedirs(save_dir)
-            self.log(f"Создана папка: {save_dir}")
+        # Добавляем расширение .jpg если его нет
+        if not filename.lower().endswith((".png", ".jpg", ".jpeg")):
+            filename += ".jpg"
 
-        # Запрашиваем имя файла (по умолчанию output.jpg)
-        default_filename = "output.jpg"
-        user_input = input(f"Введите имя файла (по умолчанию {default_filename}): ").strip('"\' ')
+        # Создаем папку save если ее нет
+        save_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "save")
+        os.makedirs(save_dir, exist_ok=True)
 
-        # Если пользователь не ввел имя, используем default_filename
-        if not user_input:
-            filename = default_filename
-        else:
-            # Если введенное имя не содержит расширения, добавляем .jpg
-            if "." not in user_input:
-                filename = f"{user_input}.jpg"
-            else:
-                filename = user_input
-
-        # Формируем полный путь для сохранения
+        # Формируем полный путь
         full_path = os.path.join(save_dir, filename)
-        full_path = os.path.normpath(full_path)  # Нормализуем путь (убираем лишние символы)
 
         try:
-            cv2.imwrite(full_path, self.image)
-            self.log(f"Изображение сохранено: {full_path}")
+            success = cv2.imwrite(full_path, self.image)
+            if success:
+                self.log(f"Изображение успешно сохранено в: {full_path}")
+                # Показываем сохраненное изображение на 2 секунды
+                self.show_image(self.image, "Сохраненное изображение", 2000)
+                return True
+            else:
+                self.log("Ошибка: не удалось сохранить изображение!")
+                return False
         except Exception as e:
-            self.log(f"Ошибка при сохранении: {str(e)}")
+            self.log(f"Ошибка сохранения: {e}")
+            return False
 
     def show_channel(self):
         """Отображение выбранного цветового канала"""
         channel = input("Выберите канал (R, G, B): ").upper()
-        if channel not in ['R', 'G', 'B']:
+        if channel not in ["R", "G", "B"]:
             self.log("Неверный выбор канала!")
             return
 
-        ch_index = {'B': 0, 'G': 1, 'R': 2}[channel]
+        ch_index = {"B": 0, "G": 1, "R": 2}[channel]
         zeros = np.zeros_like(self.image)
         zeros[:, :, ch_index] = self.image[:, :, ch_index]
 
-        cv2.imshow(f"{channel} Channel", zeros)
-        self.log(f"Отображен {channel}-канал. Нажмите любую клавишу чтобы продолжить...")
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
+        self.log(f"Отображен {channel}-канал. Окно закроется через 3 секунды...")
+        self.show_image(zeros, f"{channel} Channel")
 
     def apply_averaging(self):
         """Применение усредняющего фильтра"""
@@ -151,20 +174,16 @@ class ConsoleImageProcessor:
         blurred = cv2.blur(self.image, (ksize, ksize))
         self.image = blurred
         self.log(f"Применен усредняющий фильтр с ядром {ksize}x{ksize}")
-
-        cv2.imshow("Averaged Image", self.image)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
+        self.log("Окно закроется через 3 секунды...")
+        self.show_image(self.image, "Averaged Image")
 
     def grayscale(self):
         """Преобразование в оттенки серого"""
         gray = cv2.cvtColor(self.image, cv2.COLOR_BGR2GRAY)
         self.image = cv2.cvtColor(gray, cv2.COLOR_GRAY2BGR)
         self.log("Изображение преобразовано в оттенки серого")
-
-        cv2.imshow("Grayscale Image", gray)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
+        self.log("Окно закроется через 3 секунды...")
+        self.show_image(gray, "Grayscale Image")
 
     def draw_rectangle(self):
         """Рисование прямоугольника на изображении"""
@@ -178,10 +197,8 @@ class ConsoleImageProcessor:
             cv2.rectangle(img_copy, (x1, y1), (x2, y2), (255, 0, 0), 2)
             self.image = img_copy
             self.log(f"Нарисован прямоугольник с координатами ({x1},{y1})-({x2},{y2})")
-
-            cv2.imshow("Image with Rectangle", self.image)
-            cv2.waitKey(0)
-            cv2.destroyAllWindows()
+            self.log("Окно закроется через 3 секунды...")
+            self.show_image(self.image, "Image with Rectangle")
         except ValueError:
             self.log("Ошибка: координаты должны быть целыми числами!")
 
@@ -189,6 +206,8 @@ class ConsoleImageProcessor:
         """Сброс к оригинальному изображению"""
         self.image = self.original_image.copy()
         self.log("Изображение сброшено к оригиналу")
+        self.log("Окно закроется через 2 секунды...")
+        self.show_image(self.image, "Original Image", 2000)
 
     def show_processing_menu(self):
         """Отображение меню обработки изображения"""
@@ -237,5 +256,9 @@ class ConsoleImageProcessor:
 
 
 if __name__ == "__main__":
+    # Фикс для Wayland на Linux
+    if "WAYLAND_DISPLAY" in os.environ:
+        os.environ["QT_QPA_PLATFORM"] = "xcb"
+
     processor = ConsoleImageProcessor()
     processor.run()
